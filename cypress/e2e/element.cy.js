@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-
+import { faker } from "@faker-js/faker";
 // Prevent Cypress from failing due to uncaught exceptions from the page
 Cypress.on("uncaught:exception", (err, runnable) => {
   return false;
@@ -74,12 +74,12 @@ describe("Testing the web elements", () => {
     cy.get("#result > :nth-child(2)").should("not.have.text", "desktop");
   });
 
-  it.only("Radio btn", () => {
+  it("Radio btn", () => {
     //site render check
     cy.PageCheck("radio-button", "Radio Button");
 
+    // first two radio btns
     const expectedTexts = ["Yes", "Impressive"];
-
     cy.get('input[type="radio"]:not(:disabled)').each(($radio, index) => {
       cy.wrap($radio).check({ force: true });
       cy.get(".text-success").should("have.text", expectedTexts[index]);
@@ -87,5 +87,82 @@ describe("Testing the web elements", () => {
 
     //check third option
     cy.get("#noRadio").should("be.disabled");
+  });
+
+  it.only("web tables", () => {
+    const user = {
+      firstname: faker.name.firstName(),
+      lastname: faker.name.lastName(),
+      email: faker.internet.email(),
+      age: faker.number.int({ min: 18, max: 65 }),
+      salary: faker.number.int({ min: 30000, max: 150000 }),
+      department: faker.commerce.department(),
+    };
+
+    cy.PageCheck("webtables", "Web Tables");
+
+    // add the people
+    cy.get("#addNewRecordButton").click();
+    cy.get("#firstName").type(user.firstname);
+    cy.get("#lastName").type(user.lastname);
+    cy.get("#userEmail").type(user.email);
+    cy.get("#age").type(user.age);
+    cy.get("#salary").type(user.salary);
+    cy.get("#department").type(user.department);
+    cy.get("#submit").click();
+
+    cy.get(".rt-tr-group").first().should("contain.text", "Cierra"); // checking if the first element is coorect o rnot
+    cy.get(".rt-tr-group").should("contain.text", user.firstname); // checking if the first element is coorect o rnot
+
+    //search for the people
+    cy.get("#searchBox").type(user.firstname);
+    cy.get("#basic-addon2").click();
+    cy.get(".rt-tr-group").first().should("have.length.greaterThan", 0);
+    cy.get("#searchBox").clear();
+
+    cy.get("#edit-record-1").click();
+
+    const new_age = 40;
+    let originalAge;
+
+    cy.get("#age")
+      .invoke("val")
+      .then((val) => {
+        originalAge = Number(val); // Save original value
+        cy.log(`Original Age: ${originalAge}`);
+      })
+      .then(() => {
+        // Type the new value
+        cy.get("#age").clear().type(new_age.toString());
+      })
+      .then(() => {
+        // Get the new value and assert it's different
+        cy.get("#age")
+          .invoke("val")
+          .then((updatedVal) => {
+            const updatedAge = Number(updatedVal);
+            cy.log(`Updated Age: ${updatedAge}`);
+
+            
+            expect(updatedAge).to.not.equal(originalAge);
+          });
+      });
+    cy.get('#submit').click()  
+
+    cy.get('.rt-tr-group').first().within(()=>{
+      cy.get('.rt-td').eq(2).should('have.text', new_age)
+    });
+
+    // checking the deletion now
+    cy.get('#delete-record-1').click();
+    cy.get("#edit-record-1").should("not.exist")
+
+    //checking the row drop down
+    cy.get(".rt-tr-group").should("have.length.lessThan", 11);
+    cy.get('select[aria-label="rows per page"]').select('20');
+    cy.get(".rt-tr-group").should("have.length.greaterThan", 11);
+
+
+
   });
 });
