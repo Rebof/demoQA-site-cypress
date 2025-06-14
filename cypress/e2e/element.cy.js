@@ -89,7 +89,7 @@ describe("Testing the web elements", () => {
     cy.get("#noRadio").should("be.disabled");
   });
 
-  it.only("web tables", () => {
+  it("web tables", () => {
     const user = {
       firstname: faker.name.firstName(),
       lastname: faker.name.lastName(),
@@ -162,7 +162,19 @@ describe("Testing the web elements", () => {
     cy.get('select[aria-label="rows per page"]').select('20');
     cy.get(".rt-tr-group").should("have.length.greaterThan", 11);
 
+  });
 
+  it.only('special buttons ', () => {
 
+    cy.PageCheck("buttons", "Buttons");
+
+    cy.get('#doubleClickBtn').dblclick();
+    cy.get('#doubleClickMessage').should('be.visible'); 
+
+    cy.get('#rightClickBtn').rightclick()
+    cy.get('#rightClickMessage').should('be.visible'); 
+
+    cy.contains('button', /^Click Me$/).click() // using regex here
+    cy.get('#dynamicClickMessage').should('be.visible'); 
   });
 });
