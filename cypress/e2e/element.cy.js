@@ -177,16 +177,57 @@ describe("Testing the web elements", () => {
     cy.get("#dynamicClickMessage").should("be.visible");
   });
 
-  it.only("Links check", () => {
+  it("Links check", () => {
     cy.PageCheck("links", "Links");
 
     cy.get("#simpleLink").invoke("removeAttr", "target").click();
+    cy.url().should("include", "/");
 
     // DYNMIC LINK
     cy.PageCheck("links", "Links");
-    cy.get("#dynamicLink")
-      .should("have.attr", "href")
-      .and("include", "/")
-    cy.url().should("include", "/");
+    cy.get("#dynamicLink").should("have.attr", "href").and("include", "/");
+  });
+
+  it("Broken links: Image", () => {
+    cy.PageCheck("broken", "Broken Links - Images");
+    cy.get('img[src="/images/Toolsqa.jpg"]')
+      .eq(1)
+      .should("be.visible")
+      .and(($img) => {
+        expect($img[0].naturalWidth, "Image is broken").to.be.greaterThan(0);
+      });
+
+    // will fail as the img is broken
+    cy.get('img[src="/images/Toolsqa_1.jpg"]')
+      .should("be.visible")
+      .and(($img) => {
+        expect($img[0].naturalWidth, "Image is broken").to.be.greaterThan(0);
+      });
+  });
+
+  it.only("Broken Link: Links", () => {
+    cy.PageCheck("broken", "Broken Links - Images");
+    cy.get("a[href]").each(($link) => {
+      const url = $link.prop("href");
+
+      // Skip if URL is empty or javascript:void(0)
+      if (!url || url.startsWith("javascript:")) {
+        cy.log(`Skipping invalid URL: ${url}`);
+        return;
+      }
+
+      cy.request({
+        url,
+        failOnStatusCode: false,
+      }).then((response) => {
+        if (response.status >= 200 && response.status < 400) {
+          cy.log(`Valid link: ${url} (status: ${response.status})`);
+        } else {
+          assert.fail(
+            `Broken link detected: ${url} (status: ${response.status})`
+          );
+        }
+      });
+    });
   });
 });
