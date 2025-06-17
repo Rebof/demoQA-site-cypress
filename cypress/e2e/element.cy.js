@@ -143,38 +143,50 @@ describe("Testing the web elements", () => {
             const updatedAge = Number(updatedVal);
             cy.log(`Updated Age: ${updatedAge}`);
 
-            
             expect(updatedAge).to.not.equal(originalAge);
           });
       });
-    cy.get('#submit').click()  
+    cy.get("#submit").click();
 
-    cy.get('.rt-tr-group').first().within(()=>{
-      cy.get('.rt-td').eq(2).should('have.text', new_age)
-    });
+    cy.get(".rt-tr-group")
+      .first()
+      .within(() => {
+        cy.get(".rt-td").eq(2).should("have.text", new_age);
+      });
 
     // checking the deletion now
-    cy.get('#delete-record-1').click();
-    cy.get("#edit-record-1").should("not.exist")
+    cy.get("#delete-record-1").click();
+    cy.get("#edit-record-1").should("not.exist");
 
     //checking the row drop down
     cy.get(".rt-tr-group").should("have.length.lessThan", 11);
-    cy.get('select[aria-label="rows per page"]').select('20');
+    cy.get('select[aria-label="rows per page"]').select("20");
     cy.get(".rt-tr-group").should("have.length.greaterThan", 11);
-
   });
 
-  it.only('special buttons ', () => {
-
+  it("special buttons ", () => {
     cy.PageCheck("buttons", "Buttons");
 
-    cy.get('#doubleClickBtn').dblclick();
-    cy.get('#doubleClickMessage').should('be.visible'); 
+    cy.get("#doubleClickBtn").dblclick();
+    cy.get("#doubleClickMessage").should("be.visible");
 
-    cy.get('#rightClickBtn').rightclick()
-    cy.get('#rightClickMessage').should('be.visible'); 
+    cy.get("#rightClickBtn").rightclick();
+    cy.get("#rightClickMessage").should("be.visible");
 
-    cy.contains('button', /^Click Me$/).click() // using regex here
-    cy.get('#dynamicClickMessage').should('be.visible'); 
+    cy.contains("button", /^Click Me$/).click(); // using regex here
+    cy.get("#dynamicClickMessage").should("be.visible");
+  });
+
+  it.only("Links check", () => {
+    cy.PageCheck("links", "Links");
+
+    cy.get("#simpleLink").invoke("removeAttr", "target").click();
+
+    // DYNMIC LINK
+    cy.PageCheck("links", "Links");
+    cy.get("#dynamicLink")
+      .should("have.attr", "href")
+      .and("include", "/")
+    cy.url().should("include", "/");
   });
 });
