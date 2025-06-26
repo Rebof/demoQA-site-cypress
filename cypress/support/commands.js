@@ -23,9 +23,20 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+import "cypress-file-upload";
 
 Cypress.Commands.add('PageCheck', (link, title) => {
   cy.visit(`/${link}`)
   cy.url().should('include', `https://demoqa.com/${link}`)
   cy.get('.text-center').should('have.text', title)
 })
+
+
+Cypress.Commands.add("getIframeBody", (selector) => {
+  return cy
+    .get(selector)
+    .its("0.contentDocument.body")
+    .should("not.be.empty")
+    .then(cy.wrap);
+});
+

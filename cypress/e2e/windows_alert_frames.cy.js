@@ -35,7 +35,7 @@ describe("new windows and alerts", () => {
     cy.get("@windowOpen").should("be.called");
   });
   
-  it.only("handles alert, delayed alert, prompt, and confirmation boxes", () => {
+  it("handles alert, delayed alert, prompt, and confirmation boxes", () => {
     cy.PageCheck("alerts", "Alerts");
 
     // Listen for any alert during the test and assert conditionally
@@ -73,5 +73,18 @@ describe("new windows and alerts", () => {
  
   });
   
+  it.only('iframe body without the nests', () => {
+    cy.PageCheck("frames", "Frames");
+
+    cy.wait(5000)
+    cy.getIframeBody("#frame1").find("#sampleHeading").should("contain", "This is a sample page");
+
+
+    cy.getIframeBody("#frame2")
+      .find("#sampleHeading")
+      .should("contain", "This is a sample page");
+
+
+  });
   
 });
